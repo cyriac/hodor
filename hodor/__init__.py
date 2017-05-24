@@ -3,6 +3,7 @@ from functools import partial
 from operator import is_not
 
 import requests
+from dobject import DObject
 from lxml import html
 from lxml.cssselect import CSSSelector
 from reppy.cache import RobotsCache
@@ -210,4 +211,4 @@ class Hodor(object):
     def data(self):
         if not hasattr(self, '_data'):
             self.get()
-        return self._data
+        return DObject(self._data)

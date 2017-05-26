@@ -27,7 +27,8 @@ class Hodor(object):
                  ssl_verify=False,
                  trim_values=True,
                  robots=True,
-                 reppy_capacity=100):
+                 reppy_capacity=100,
+                 html_provider={'agent': 'requests'}):
 
         self.content = None
         self.url = url
@@ -37,6 +38,7 @@ class Hodor(object):
         self.ua = ua
         self.trim_values = trim_values
         self.ssl_verify = ssl_verify
+        self.html_provider = html_provider
         self.config = {}
         self.extra_config = {}
 
@@ -68,7 +70,7 @@ class Hodor(object):
                 pass
         return crawl_delay
 
-    def _fetch(self, url):
+    def _fetch_with_requests(self, url, **kwargs):
         '''Does the requests fetching and stores result in self.content'''
 
         if self.robots in EMPTY_VALUES or self.robots.allowed(url, self.ua):
@@ -83,6 +85,21 @@ class Hodor(object):
             self.content = r.content
 
         return self.content
+
+    def _fetch_with_chrome(self, url, **kwargs):
+        return self.content
+
+    def _fetch_with_nightmare(self, url, **kwargs):
+        return self.content
+
+    def _fetch_with_phantom(self, url, **kwargs):
+        return self.content
+
+    def _fetch(self, url):
+        agent = self.html_provider['agent']
+        html_provider_config = copy.deepcopy(self.html_provider)
+        del html_provider_config['agent']
+        return getattr(self, '_fetch_with_{}'.format(agent))(url, **html_provider_config)
 
     @staticmethod
     def _get_value(content, rule):
